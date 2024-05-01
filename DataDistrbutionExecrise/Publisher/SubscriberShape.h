@@ -18,7 +18,6 @@ public:
     std::string shapeType;
     double frequency;
     std::vector<SendingInfo> specificTypeList;
-    //std::set<SendingInfo> specificTypeSet; // Change from vector to set
 
     double convertFrequency(int frequencyInHZ);
 };

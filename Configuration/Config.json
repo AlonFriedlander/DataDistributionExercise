@@ -1,0 +1,12 @@
+{
+  "subscriberName": "MySubscriber",
+  "portNumber": 12347,
+  "shapeType": [ "SQUARE","CIRCLE","SQUARE"],
+  "attributes": [ "size", "coordinates" ],
+  "multicastSendingGroup": "234.5.6.7",
+  "multicastSendingPort": 8910,
+  "receiveTimeout": 5000,
+  "registrationFrequency": 5,
+  "sqaureFrequency": 2,
+  "circleFrequency": 3  
+}

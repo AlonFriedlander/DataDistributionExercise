@@ -9,11 +9,9 @@ int main(int argc, char* argv[])
     // shapeType: Choose the shape(s) you want to receive. Available options: SQUARE, CIRCLE, or both SQUARE:CIRCLE.
     // attributes: Specify the attributes you want to receive. Available options: size, coordinates, colors.
 
-    // Convert command-line arguments to vector of strings, excluding the program name
-    std::vector<std::string> args(argv + 1, argv + argc);
 
     // Pass the arguments as an array to the constructor of Subscriber
-    Subscriber subscriber(args);
+    Subscriber subscriber;
 
     std::this_thread::sleep_for(std::chrono::seconds(1000));
 

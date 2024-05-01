@@ -76,6 +76,10 @@ private:
     void squareHandler();
     void generateShapeJson(nlohmann::json& shapeJson);
     void initializeFunctionMap();
+    void loadConfigurationFromJson(); 
+    std::chrono::milliseconds hertzToMilliseconds(int frequencyHz);
+
+
 
 
 
@@ -83,6 +87,11 @@ private:
 
     // Private data members
     bool running;
+    std::string multicastReceivingGroup;
+    int multicastReceivingPort;
+    nlohmann::json jsonConfig;
+    std::chrono::milliseconds squareFrequency;
+    std::chrono::milliseconds circleFrequency;
     SOCKET multicastSocket;
     SOCKET unicastSocket;
     SOCKET sendApprovedSocket;

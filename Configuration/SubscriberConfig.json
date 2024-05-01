@@ -1,0 +1,6 @@
+{
+  "subscriberName": "MySubscriber",
+  "portNumber": 12345,
+  "shapeType": "SQUARE",
+  "attributes": [ "size", "coordinates" ]
+}

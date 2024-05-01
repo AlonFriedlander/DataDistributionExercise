@@ -14,6 +14,7 @@ Publisher::Publisher() : running(true) {
     createSockets();
 
     initializeFunctionMap();
+    
     // Initialize list of subscribers
     initializeList();
 }
@@ -30,7 +31,6 @@ void Publisher::createSockets() {
     sockaddr_in serverAddress = CommonSocketFunctions::setUpUnicastAddressStructure(multicastReceivingPort);
     CommonSocketFunctions::bindSocket(multicastSocket, serverAddress);
     CommonSocketFunctions::joinMulticastGroup(multicastSocket, multicastReceivingGroup);
-
     unicastSocket = CommonSocketFunctions::createUdpSocket(false);
 }
 
@@ -45,7 +45,6 @@ void Publisher::startPublishing() {
 
 // Stops the publishing process
 void Publisher::stopPublishing() {
-    std::cout << "stop publishing" << std::endl;
     running = false;
     closesocket(multicastSocket);
     closesocket(unicastSocket);
@@ -56,7 +55,7 @@ void Publisher::stopPublishing() {
 void Publisher::initializeList() {
     for (ShapeEnum::ShapeType shapeType : ShapeEnum::AllTypes) {
         // Create a subscriber shape object
-        SubscriberShapePtr subscriberShapePtr = std::make_shared<SubscriberShape>(shapeTypeToString(shapeType), getFrequency(shapeType));
+        SubscriberShapePtr subscriberShapePtr = std::make_shared<std::vector<SendingInfo>>();
 
         // Add the subscriber shape object to the list
         subscribersList.push_back(subscriberShapePtr);
@@ -74,13 +73,10 @@ void Publisher::initializeFunctionMap() {
 
 
 void Publisher::eventManager() {
-    // Create a thread for handling circles
-    std::thread circleThread(&Publisher::circleHandler, this);
-    // Create a thread for handling squares
-    std::thread squareThread(&Publisher::squareHandler, this);
-
-    circleThread.detach();
-    squareThread.detach();
+    ThreadPool threadPool(5);
+    // Add tasks to the thread pool
+    threadPool.enqueue([this] { circleHandler(); });
+    threadPool.enqueue([this] { squareHandler(); });
 }
 
 //Gets the frequency for a given shape type
@@ -119,7 +115,7 @@ void Publisher::circleHandler() {
         auto i = map.find("CIRCLE");
         SubscriberShapePtr subscriberShapePtr = i->second;
 
-        for (const SendingInfo& sendingInfo : subscriberShapePtr->specificTypeList) {
+        for (const SendingInfo& sendingInfo : *subscriberShapePtr) {
             sendShapeString(jsonString, sendingInfo);
         }
 
@@ -146,7 +142,7 @@ void Publisher::squareHandler() {
         auto i = map.find("SQUARE");
         SubscriberShapePtr subscriberShapePtr = i->second;
 
-        for (const SendingInfo& sendingInfo : subscriberShapePtr->specificTypeList) {
+        for (const SendingInfo& sendingInfo : *subscriberShapePtr) {
             sendShapeString(jsonString, sendingInfo);
         }
 
@@ -220,10 +216,10 @@ void Publisher::subscriberRegistrar() {
                 if (map.count(shapeType)) {
                     auto it = map.find(shapeType);
                     SubscriberShapePtr subscriberShapePtr = it->second;
-                    subscriberShapePtr->specificTypeList.push_back(sendingInfo);
+                    subscriberShapePtr->push_back(sendingInfo);
 
                     std::cout << "Registered subscriber for shape type: " << shapeType << std::endl;
-                    std::cout << "Total subscribers for " << shapeType << ": " << subscriberShapePtr->specificTypeList.size() << std::endl;
+                    std::cout << "Total subscribers for " << shapeType << ": " << subscriberShapePtr->size() << std::endl;
                 }
                 else {
                     // Handle case when shape type is not found in map
@@ -254,14 +250,6 @@ void Publisher::loadConfigurationFromJson() {
 std::chrono::milliseconds Publisher::hertzToMilliseconds(int frequencyHz) {
     return std::chrono::milliseconds(static_cast<long long>(1000) / frequencyHz);
 }
-
-
-
-
-
-
-
-
 
 
 

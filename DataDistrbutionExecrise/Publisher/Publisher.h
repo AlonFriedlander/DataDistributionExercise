@@ -4,6 +4,9 @@
 #define PUBLISHER_H
 
 #include <array>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
 #include <functional>
 #include <cstring>
 #include <set>
@@ -16,9 +19,8 @@
 #include <memory>
 #include <chrono>
 #include <stdexcept>
+#include "ThreadPool.h"
 #include "CommonLibrary\Common.h"
-#include "Shape.h"
-#include "SubscriberShape.h"
 #include "SendingInfo.h"
 #include "../../../external/json/include/nlohmann/json.hpp"
 
@@ -45,8 +47,9 @@ namespace ShapeEnum
     static const ShapeType AllTypes[] = { ShapeType::SQUARE, ShapeType::CIRCLE };
 }
 // Define a type alias for the subscriber shape pointer
-using SubscriberShapePtr = std::shared_ptr<SubscriberShape>;
-
+//using SubscriberShapePtr = std::shared_ptr<SubscriberShape>;
+using SubscriberShapePtr = std::shared_ptr<std::vector<SendingInfo>>;
+class ThreadPool;
 // Define Publisher class
 class Publisher {
 public:
@@ -62,19 +65,20 @@ private:
     int getFrequency(ShapeEnum::ShapeType shapeType) const;
     std::string shapeTypeToString(ShapeEnum::ShapeType shapeType) const;
     void eventManager();
-    void sendScheduledTasks(int counter);
-    void sendToSubscriber(SubscriberShape& subscribersShape);
-    Shape* generateShape(std::string& shapeType);
+    //void threadPool(int numThreads);
+    //void sendScheduledTasks(int counter);
+    //void sendToSubscriber(SubscriberShape& subscribersShape);
+    //Shape* generateShape(std::string& shapeType);
     void sendShapeString(const std::string& shapeString, const SendingInfo& sendingInfo);
     void subscriberRegistrar();
-    std::string generateSquareString(const Shape* shape);
-    std::string generateCircleString(const Shape* shape);
+    //std::string generateSquareString(const Shape* shape);
+    //std::string generateCircleString(const Shape* shape);
     std::string generateSize();
     std::string generateCoordinates();
     std::string generateColors();
     void circleHandler();
     void squareHandler();
-    void generateShapeJson(nlohmann::json& shapeJson);
+    //void generateShapeJson(nlohmann::json& shapeJson);
     void initializeFunctionMap();
     void loadConfigurationFromJson(); 
     std::chrono::milliseconds hertzToMilliseconds(int frequencyHz);
@@ -86,6 +90,7 @@ private:
     void createSockets();
 
     // Private data members
+    std::vector<SendingInfo> specificTypeList;
     bool running;
     std::string multicastReceivingGroup;
     int multicastReceivingPort;

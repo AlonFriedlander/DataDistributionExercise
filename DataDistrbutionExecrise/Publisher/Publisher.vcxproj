@@ -153,14 +153,12 @@
   <ItemGroup>
     <ClInclude Include="Publisher.h" />
     <ClInclude Include="SendingInfo.h" />
-    <ClInclude Include="Shape.h" />
-    <ClInclude Include="SubscriberShape.h" />
+    <ClInclude Include="ThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Publisher.cpp" />
     <ClCompile Include="SendingInfo.cpp" />
-    <ClCompile Include="Shape.cpp" />
-    <ClCompile Include="SubscriberShape.cpp" />
+    <ClCompile Include="ThreadPool.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

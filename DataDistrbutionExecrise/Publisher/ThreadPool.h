@@ -22,5 +22,6 @@ private:
     std::queue<Task> tasks;
     std::mutex queueMutex;
     std::condition_variable condition;
-    bool stop;
+    //bool stop;
+    std::atomic<bool> stop;
 };

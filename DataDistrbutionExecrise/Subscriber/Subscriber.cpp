@@ -2,7 +2,6 @@
 
 
 Subscriber::Subscriber() : running(true) {
-
     // Initialize Winsock
     WSADATA data;
     if (WSAStartup(MAKEWORD(2, 2), &data) != 0) {
@@ -97,13 +96,10 @@ void Subscriber::receiveUnicastData() {
 }
 
 std::string Subscriber::serializeToJson() const {
-    // Convert set of shapes to vector
-    std::vector<std::string> shapeTypesVector(subscribedShapes.begin(), subscribedShapes.end());
-
     // Create JSON object
     nlohmann::json jsonData;
     jsonData["portNumber"] = portNumber;
-    jsonData["shapeTypes"] = shapeTypesVector;
+    jsonData["shapeTypes"] = subscribedShapes;
 
     // Serialize JSON to string
     return jsonData.dump();

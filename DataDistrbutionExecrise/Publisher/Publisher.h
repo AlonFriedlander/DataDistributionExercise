@@ -3,14 +3,9 @@
 #ifndef PUBLISHER_H
 #define PUBLISHER_H
 
-#include <array>
-#include <queue>
-#include <mutex>
-#include <condition_variable>
 #include <functional>
 #include <cstring>
 #include <set>
-#include <unordered_map>
 #include <sstream>
 #include <iomanip>
 #include <fstream>
@@ -19,6 +14,7 @@
 #include <memory>
 #include <chrono>
 #include <stdexcept>
+
 #include "ThreadPool.h"
 #include "CommonLibrary\Common.h"
 #include "SendingInfo.h"
@@ -34,6 +30,7 @@
 
 // Forward declarations
 class Shape;
+class ThreadPool;
 
 namespace ShapeEnum
 {
@@ -47,9 +44,7 @@ namespace ShapeEnum
     static const ShapeType AllTypes[] = { ShapeType::SQUARE, ShapeType::CIRCLE };
 }
 // Define a type alias for the subscriber shape pointer
-//using SubscriberShapePtr = std::shared_ptr<SubscriberShape>;
 using SubscriberShapePtr = std::shared_ptr<std::vector<SendingInfo>>;
-class ThreadPool;
 // Define Publisher class
 class Publisher {
 public:
@@ -62,31 +57,18 @@ public:
 private:
     // Private member functions
     void initializeList();
-    int getFrequency(ShapeEnum::ShapeType shapeType) const;
     std::string shapeTypeToString(ShapeEnum::ShapeType shapeType) const;
     void eventManager();
-    //void threadPool(int numThreads);
-    //void sendScheduledTasks(int counter);
-    //void sendToSubscriber(SubscriberShape& subscribersShape);
-    //Shape* generateShape(std::string& shapeType);
-    void sendShapeString(const std::string& shapeString, const SendingInfo& sendingInfo);
+    void sendShape(const std::string& shapeString, const SendingInfo& sendingInfo);
     void subscriberRegistrar();
-    //std::string generateSquareString(const Shape* shape);
-    //std::string generateCircleString(const Shape* shape);
     std::string generateSize();
     std::string generateCoordinates();
     std::string generateColors();
     void circleHandler();
     void squareHandler();
-    //void generateShapeJson(nlohmann::json& shapeJson);
     void initializeFunctionMap();
     void loadConfigurationFromJson(); 
     std::chrono::milliseconds hertzToMilliseconds(int frequencyHz);
-
-
-
-
-
     void createSockets();
 
     // Private data members
@@ -101,20 +83,25 @@ private:
     SOCKET unicastSocket;
     SOCKET sendApprovedSocket;
     sockaddr_in multicastSendingAddr;
-    //std::vector<SubscriberShape> subscribersList;
-    //std::map<std::string, SubscriberShape> map;
     std::vector<SubscriberShapePtr> subscribersList;
     std::map<std::string, SubscriberShapePtr> map;
-    //std::map<std::string, std::function<void()>> functionMap;
-    //std::map<std::string, std::function<std::variant<int, std::vector<int>, std::string>()>> functionMap;
-
-    // Declare the function pointers
-    //using FunctionPtr = std::string(Publisher::*)();
-    using FunctionPtr = std::function<std::string()>;
 
     // Define the map with function pointers
+    using FunctionPtr = std::function<std::string()>;
     std::map<std::string, FunctionPtr> functionMap;
     std::set<int> registeredPortNumbers; // Set to store registered port numbers
 };
 
 #endif // PUBLISHER_H
+
+// Include cross-platform headers for socket programming
+//#ifdef _WIN32
+//#include <winsock2.h>
+//#include <ws2tcpip.h>
+//#pragma comment(lib, "ws2_32.lib") // Link against with ws2_32.lib
+//#else
+//#include <sys/socket.h>
+//#include <netinet/in.h>
+//#include <arpa/inet.h>
+//#include <unistd.h>
+//#endif

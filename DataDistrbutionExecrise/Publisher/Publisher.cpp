@@ -1,6 +1,5 @@
 #include "Publisher.h"
 
-
 // Constructor
 Publisher::Publisher() : running(true) {
     // Initialize Winsock
@@ -10,12 +9,10 @@ Publisher::Publisher() : running(true) {
     }
 
     loadConfigurationFromJson();
-
     createSockets();
-
     initializeFunctionMap();
     
-    // Initialize list of subscribers
+    // Initialize list and map of subscribers
     initializeList();
 }
 
@@ -31,6 +28,7 @@ void Publisher::createSockets() {
     sockaddr_in serverAddress = CommonSocketFunctions::setUpUnicastAddressStructure(multicastReceivingPort);
     CommonSocketFunctions::bindSocket(multicastSocket, serverAddress);
     CommonSocketFunctions::joinMulticastGroup(multicastSocket, multicastReceivingGroup);
+
     unicastSocket = CommonSocketFunctions::createUdpSocket(false);
 }
 
@@ -73,20 +71,12 @@ void Publisher::initializeFunctionMap() {
 
 
 void Publisher::eventManager() {
-    ThreadPool threadPool(5);
+    ThreadPool threadPool(jsonConfig["numOfThreads"]);
     // Add tasks to the thread pool
     threadPool.enqueue([this] { circleHandler(); });
     threadPool.enqueue([this] { squareHandler(); });
 }
 
-//Gets the frequency for a given shape type
-int Publisher::getFrequency(ShapeEnum::ShapeType shapeType) const {
-    switch (shapeType) {
-    case ShapeEnum::ShapeType::SQUARE: return 2; // 2 Hz
-    case ShapeEnum::ShapeType::CIRCLE: return 3; // 3 Hz
-    default: return 0;
-    }
-}
 
 //Converts ShapeType enum value to string
 std::string Publisher::shapeTypeToString(ShapeEnum::ShapeType shapeType) const {
@@ -103,7 +93,7 @@ void Publisher::circleHandler() {
     nlohmann::json circleJson;
 
     // Add the shapeType field
-    circleJson["shapeType"] = "Circle";
+    circleJson["shapeType"] = shapeTypeToString(ShapeEnum::ShapeType::CIRCLE);
 
     while (running) {
         for (const auto& entry : functionMap) {
@@ -112,14 +102,14 @@ void Publisher::circleHandler() {
 
         std::string jsonString = circleJson.dump();
 
-        auto i = map.find("CIRCLE");
+        auto i = map.find(shapeTypeToString(ShapeEnum::ShapeType::CIRCLE));
         SubscriberShapePtr subscriberShapePtr = i->second;
 
         for (const SendingInfo& sendingInfo : *subscriberShapePtr) {
-            sendShapeString(jsonString, sendingInfo);
+            sendShape(jsonString, sendingInfo);
         }
 
-        std::this_thread::sleep_for(circleFrequency); // Sleep for 0.333 seconds
+        std::this_thread::sleep_for(circleFrequency); 
     }
 }
 
@@ -130,7 +120,7 @@ void Publisher::squareHandler() {
     nlohmann::json squareJson;
 
     // Add the shapeType field
-    squareJson["shapeType"] = "Square";
+    squareJson["shapeType"] = shapeTypeToString(ShapeEnum::ShapeType::SQUARE);
 
     while (running) {
         for (const auto& entry : functionMap) {
@@ -139,46 +129,45 @@ void Publisher::squareHandler() {
 
         std::string jsonString = squareJson.dump();
 
-        auto i = map.find("SQUARE");
+        auto i = map.find(shapeTypeToString(ShapeEnum::ShapeType::SQUARE));
         SubscriberShapePtr subscriberShapePtr = i->second;
 
         for (const SendingInfo& sendingInfo : *subscriberShapePtr) {
-            sendShapeString(jsonString, sendingInfo);
+            sendShape(jsonString, sendingInfo);
         }
 
-        std::this_thread::sleep_for(squareFrequency); // Sleep for 0.5 seconds
+        std::this_thread::sleep_for(squareFrequency); 
     }
 }
 
-// Generates a random size for the shape and returns it as a string
+// Generates a random size for the shape 
 std::string Publisher::generateSize() {
     int size = (rand() % 100) + 1; // Random size between 1 and 100
     return std::to_string(size);
 }
 
-// Generates random coordinates for the shape and returns them as a string
+// Generates random coordinates for the shape 
 std::string Publisher::generateCoordinates() {
     std::vector<int> coordinates(3);
     for (int i = 0; i < 3; ++i) {
         coordinates[i] = rand() % 1500; // Random coordinate
     }
-    // Convert coordinates to string format
+
     std::string coordinatesString = "[" + std::to_string(coordinates[0]) + ", " +
         std::to_string(coordinates[1]) + ", " +
         std::to_string(coordinates[2]) + "]";
     return coordinatesString;
 }
 
-// Generates random colors for the shape and returns a string
+// Generates random colors for the shape 
 std::string Publisher::generateColors() {
     std::vector<std::string> colors = { "Red", "Blue", "Green", "Yellow", "Purple" };
     int randomIndex = rand() % colors.size(); // Generate a random index within the range of colors vector
     return colors[randomIndex]; // Return the color at the random index
 }
 
-
-//Sends a string representation of a shape to a subscriber
-void Publisher::sendShapeString(const std::string& shapeString, const SendingInfo& sendingInfo) {
+//Sends a shape to subscriber
+void Publisher::sendShape(const std::string& shapeString, const SendingInfo& sendingInfo) {
     const sockaddr_in& addr = sendingInfo.getAddress();
     sendto(unicastSocket, shapeString.c_str(), shapeString.length(), 0, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr));
 }
@@ -222,7 +211,7 @@ void Publisher::subscriberRegistrar() {
                     std::cout << "Total subscribers for " << shapeType << ": " << subscriberShapePtr->size() << std::endl;
                 }
                 else {
-                    // Handle case when shape type is not found in map
+                    std::cout << "This shape is not avalible: " << shapeType << std::endl;
                 }
             }
         }
@@ -248,7 +237,7 @@ void Publisher::loadConfigurationFromJson() {
 }
 
 std::chrono::milliseconds Publisher::hertzToMilliseconds(int frequencyHz) {
-    return std::chrono::milliseconds(static_cast<long long>(1000) / frequencyHz);
+    return std::chrono::milliseconds(1000 / frequencyHz);
 }
 
 

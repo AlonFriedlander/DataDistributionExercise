@@ -21,11 +21,6 @@
 
 class Subscriber {
 public:
-    enum class ShapeType {
-        CIRCLE,
-        SQUARE
-    };
-
     Subscriber();
     ~Subscriber();
     void stopPublishing();
@@ -40,14 +35,14 @@ private:
 
     SOCKET sendSocketDescriptor;
     SOCKET unicastSocket;
-    std::string subscriberName;
-    int portNumber;
+    sockaddr_in multicastSendingAddr;
     std::string multicastSendingGroup;
     int multicastSendingPort;
-    bool flag = true;
+    
+    std::string subscriberName;
+    int portNumber;
     bool running;
     std::set<std::string> subscribedShapes;
     std::vector<std::string> attributes;
     nlohmann::json jsonConfig;
-    sockaddr_in multicastSendingAddr;
 };

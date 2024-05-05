@@ -1,7 +1,7 @@
 {
   "subscriberName": "MySubscriber",
   "portNumber": 12347,
-  "shapeType": [ "SQUARE","CIRCLE"],
+  "shapeType": [ "SQUARE", "CIRCLE"],
   "attributes": [ "size", "coordinates" ],
   "multicastSendingGroup": "234.5.6.7",
   "multicastSendingPort": 8910,

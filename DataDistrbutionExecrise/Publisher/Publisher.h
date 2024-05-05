@@ -55,6 +55,9 @@ public:
     void stopPublishing();
 
 private:
+    using FunctionPtr = std::function<std::string()>;
+
+
     // Private member functions
     void initializeList();
     std::string shapeTypeToString(ShapeEnum::ShapeType shapeType) const;
@@ -70,6 +73,10 @@ private:
     void loadConfigurationFromJson(); 
     std::chrono::milliseconds hertzToMilliseconds(int frequencyHz);
     void createSockets();
+    //void circleTask(ThreadPool& pool);
+    //void squareTask(ThreadPool& pool);
+    //void handler(const std::string& jsonString, const SubscriberShapePtr& subscriberShapePtr);
+
 
     // Private data members
     std::vector<SendingInfo> specificTypeList;
@@ -85,9 +92,10 @@ private:
     sockaddr_in multicastSendingAddr;
     std::vector<SubscriberShapePtr> subscribersList;
     std::map<std::string, SubscriberShapePtr> map;
+    std::mutex functionMapMutex;
 
     // Define the map with function pointers
-    using FunctionPtr = std::function<std::string()>;
+    //using FunctionPtr = std::function<std::string()>;
     std::map<std::string, FunctionPtr> functionMap;
     std::set<int> registeredPortNumbers; // Set to store registered port numbers
 };

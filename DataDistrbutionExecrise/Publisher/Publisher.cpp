@@ -242,3 +242,64 @@ std::chrono::milliseconds Publisher::hertzToMilliseconds(int frequencyHz) {
 
 
 
+
+//try with thread pool that each thread execute the task once and back to the pool...
+//...................................................................................
+//void Publisher::eventManager() {
+//    ThreadPool pool(jsonConfig["numOfThreads"]); // Create the thread pool
+//    std::thread circleThread(&Publisher::circleTask, this, std::ref(pool)); // Pass pool by reference
+//    std::thread squareThread(&Publisher::squareTask, this, std::ref(pool)); // Pass pool by reference
+//    circleThread.join();
+//    squareThread.join();
+//}
+//
+//void Publisher::circleTask(ThreadPool& pool) {
+//    auto i = map.find(shapeTypeToString(ShapeEnum::ShapeType::CIRCLE));
+//    SubscriberShapePtr subscriberShapePtr = i->second;
+//    // Create a JSON object
+//    nlohmann::json circleJson;
+//    // Add the shapeType field
+//    circleJson["shapeType"] = shapeTypeToString(ShapeEnum::ShapeType::CIRCLE);
+//    while (running) {
+//        for (const auto& entry : functionMap) {
+//            circleJson[entry.first] = entry.second(); // Call the function and store the result in JSON
+//        }
+//        std::string jsonString = circleJson.dump();
+//        std::this_thread::sleep_for(circleFrequency);
+//        if (!subscriberShapePtr->empty()) {
+//            pool.enqueue([jsonString, subscriberShapePtr, this] { handler(jsonString, subscriberShapePtr); });
+//
+//        }
+//    }
+//}
+//
+//void Publisher::squareTask(ThreadPool& pool) {
+//    auto i = map.find(shapeTypeToString(ShapeEnum::ShapeType::SQUARE));
+//    SubscriberShapePtr subscriberShapePtr = i->second;
+//    // Create a JSON object
+//    nlohmann::json squareJson;
+//    // Add the shapeType field
+//    squareJson["shapeType"] = shapeTypeToString(ShapeEnum::ShapeType::SQUARE);
+//    while (running) {
+//        for (const auto& entry : functionMap) {
+//            squareJson[entry.first] = entry.second(); // Call the function and store the result in JSON
+//        }
+//        std::string jsonString = squareJson.dump();
+//        std::this_thread::sleep_for(squareFrequency);
+//        if (!subscriberShapePtr->empty()) {
+//            pool.enqueue([jsonString, subscriberShapePtr, this] { handler(jsonString, subscriberShapePtr); });
+//        }
+//    }
+//}
+//
+////task
+//void Publisher::handler(const std::string& jsonString, const SubscriberShapePtr& subscriberShapePtr) {
+//    for (const SendingInfo& sendingInfo : *subscriberShapePtr) {
+//        sendShape(jsonString, sendingInfo);
+//    }
+//}
+
+
+
+
+

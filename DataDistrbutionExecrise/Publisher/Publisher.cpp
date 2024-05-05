@@ -196,8 +196,11 @@ void Publisher::subscriberRegistrar() {
             // Register the port number
             registeredPortNumbers.insert(portNumber);
 
+            char clientIP[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &(clientAddress.sin_addr), clientIP, INET_ADDRSTRLEN);
+
             //Create SendingInfo
-            SendingInfo sendingInfo(portNumber);
+            SendingInfo sendingInfo(portNumber,clientIP);
 
             //Iterate over shape types and update SubscriberShape
             for (const auto& shapeType : jsonData["shapeTypes"]) {

@@ -38,23 +38,6 @@ void CommonSocketFunctions::setSocketOptions(SOCKET socket, bool reuseAddress, D
             throw std::runtime_error("Error setting receive timeout");
         }
     }
-
-    //// Set WSA_FLAG_OVERLAPPED flag if socket is created with WSASocket
-    //DWORD flags = 0;
-    //int flagsSize = sizeof(flags); // Correct size type for getsockopt
-    //if (getsockopt(socket, SOL_SOCKET, SO_TYPE, reinterpret_cast<char*>(&flags), &flagsSize) == 0) {
-    //    if (flags & WSA_FLAG_OVERLAPPED) {
-    //        return; // Already has WSA_FLAG_OVERLAPPED flag set
-    //    }
-    //}
-
-    //// Add WSA_FLAG_OVERLAPPED flag
-    //flags |= WSA_FLAG_OVERLAPPED;
-    //if (setsockopt(socket, SOL_SOCKET, SO_TYPE, reinterpret_cast<const char*>(&flags), sizeof(flags)) == SOCKET_ERROR) {
-    //    closesocket(socket);
-    //    WSACleanup();
-    //    throw std::runtime_error("Error setting WSA_FLAG_OVERLAPPED flag");
-    //}
 }
 
 
@@ -87,20 +70,6 @@ void CommonSocketFunctions::bindSocket(SOCKET sock, const sockaddr_in& address) 
 }
 
 
-//Try and bind the socket to the IP and port
-//if (bind(unicastSocket, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
-//{
-//    std::cout << "Can't bind socket! " << WSAGetLastError() << std::endl;
-//    return;
-//}
-
-//// Bind the socket to the specified port
-//if (bind(recvSocketDescriptor, reinterpret_cast<const sockaddr*>(&multicastReceivingAddr), sizeof(multicastReceivingAddr)) == SOCKET_ERROR) {
-//    closesocket(recvSocketDescriptor);
-//    WSACleanup();
-//    throw std::runtime_error("Error binding socket");
-//}
-
 void CommonSocketFunctions::joinMulticastGroup(SOCKET socket, const std::string& multicastGroup) {
     ip_mreq multicastRequest;
     inet_pton(AF_INET, (PCSTR)(multicastGroup.c_str()), &multicastRequest.imr_multiaddr.s_addr);
@@ -112,12 +81,3 @@ void CommonSocketFunctions::joinMulticastGroup(SOCKET socket, const std::string&
     }
 }
 
-//// Join the multicast group
-//ip_mreq multicastRequest;
-//inet_pton(AF_INET, (PCSTR)(multicastReceivingGroup.c_str()), &multicastRequest.imr_multiaddr.s_addr);
-//multicastRequest.imr_interface.s_addr = htonl(INADDR_ANY);
-//if (setsockopt(recvSocketDescriptor, IPPROTO_IP, IP_ADD_MEMBERSHIP, reinterpret_cast<const char*>(&multicastRequest), sizeof(multicastRequest)) == SOCKET_ERROR) {
-//    closesocket(recvSocketDescriptor);
-//    WSACleanup();
-//    throw std::runtime_error("Error joining multicast group");
-//}

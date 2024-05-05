@@ -1,3 +1,5 @@
 ﻿  Publisher.cpp
 C:\Users\alonf\Desktop\DataDistrbution\DataDistrbutionExecrise\Publisher\Publisher.cpp(172,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  SendingInfo.cpp
+  Generating Code...
   Publisher.vcxproj -> C:\Users\alonf\Desktop\DataDistrbution\DataDistrbutionExecrise\x64\Debug\Publisher.lib

@@ -1,7 +1,7 @@
 #include "Publisher.h"
 
 // Constructor
-Publisher::Publisher() : running(true) {
+Publisher::Publisher() : running(true), threadPool(){
     // Initialize Winsock
     WSADATA data;
     if (WSAStartup(MAKEWORD(2, 2), &data) != 0) {
@@ -14,6 +14,8 @@ Publisher::Publisher() : running(true) {
     
     // Initialize list and map of subscribers
     initializeList();
+
+    threadPool.startThreadPool(jsonConfig["numOfThreads"]);
 }
 
 // Destructor
@@ -32,22 +34,24 @@ void Publisher::createSockets() {
     unicastSocket = CommonSocketFunctions::createUdpSocket(false);
 }
 
-//// Starts the publishing process
+// Starts the publishing process
 void Publisher::startPublishing() {
-    std::thread listenerThread(&Publisher::subscriberRegistrar, this);
-    std::thread eventManagerThread(&Publisher::eventManager, this);
+    listenerThread = std::thread(&Publisher::subscriberRegistrar, this);
 
-    listenerThread.detach();
-    eventManagerThread.detach();
+    threadPool.enqueue([this] { circleHandler(); });
+    threadPool.enqueue([this] { squareHandler(); });
 }
+
 
 // Stops the publishing process
 void Publisher::stopPublishing() {
     running = false;
     closesocket(multicastSocket);
     closesocket(unicastSocket);
+    if (listenerThread.joinable()) {
+        listenerThread.join();
+    }
 }
-
 
 // Internal: Initializes the list of subscribers
 void Publisher::initializeList() {
@@ -68,15 +72,6 @@ void Publisher::initializeFunctionMap() {
     functionMap["coordinates"] = std::bind(&Publisher::generateCoordinates, this);
     functionMap["colors"] = std::bind(&Publisher::generateColors, this);
 }
-
-
-void Publisher::eventManager() {
-    ThreadPool threadPool(jsonConfig["numOfThreads"]);
-    // Add tasks to the thread pool
-    threadPool.enqueue([this] { circleHandler(); });
-    threadPool.enqueue([this] { squareHandler(); });
-}
-
 
 //Converts ShapeType enum value to string
 std::string Publisher::shapeTypeToString(ShapeEnum::ShapeType shapeType) const {
@@ -104,7 +99,8 @@ void Publisher::circleHandler() {
 
         auto i = map.find(shapeTypeToString(ShapeEnum::ShapeType::CIRCLE));
         SubscriberShapePtr subscriberShapePtr = i->second;
-
+        
+        std::lock_guard<std::mutex> lock(registeredSubscribersMutex);
         for (const SendingInfo& sendingInfo : *subscriberShapePtr) {
             sendShape(jsonString, sendingInfo);
         }
@@ -132,6 +128,7 @@ void Publisher::squareHandler() {
         auto i = map.find(shapeTypeToString(ShapeEnum::ShapeType::SQUARE));
         SubscriberShapePtr subscriberShapePtr = i->second;
 
+        std::lock_guard<std::mutex> lock(registeredSubscribersMutex);
         for (const SendingInfo& sendingInfo : *subscriberShapePtr) {
             sendShape(jsonString, sendingInfo);
         }
@@ -207,6 +204,8 @@ void Publisher::subscriberRegistrar() {
                 if (map.count(shapeType)) {
                     auto it = map.find(shapeType);
                     SubscriberShapePtr subscriberShapePtr = it->second;
+
+                    std::lock_guard<std::mutex> lock(registeredSubscribersMutex);
                     subscriberShapePtr->push_back(sendingInfo);
 
                     std::cout << "Registered subscriber for shape type: " << shapeType << std::endl;
@@ -220,23 +219,32 @@ void Publisher::subscriberRegistrar() {
     }
 }
 
+
 void Publisher::loadConfigurationFromJson() {
-    // Open the JSON file
-    std::ifstream file("../../Configuration/Config.json");
+    try {
+        // Get the path to the configuration file
+        std::filesystem::path configFilePath = std::filesystem::current_path() / ".." / ".." / "Configuration"/ "Config.json";
 
-    if (!file.is_open()) {
-        std::cerr << "Error opening JSON file." << std::endl;
-        return;
+        // Open the JSON file
+        std::ifstream file(configFilePath);
+
+        if (!file.is_open()) {
+            throw std::runtime_error("Error opening JSON file.");
+        }
+
+        jsonConfig = nlohmann::json::parse(file);
+
+        // Extract parameters
+        multicastReceivingGroup = jsonConfig["multicastSendingGroup"];
+        multicastReceivingPort = jsonConfig["multicastSendingPort"];
+        squareFrequency = hertzToMilliseconds(jsonConfig["sqaureFrequency"]);
+        circleFrequency = hertzToMilliseconds(jsonConfig["circleFrequency"]);
     }
-
-    jsonConfig = nlohmann::json::parse(file);
-
-    // Extract parameters
-    multicastReceivingGroup = jsonConfig["multicastSendingGroup"];
-    multicastReceivingPort = jsonConfig["multicastSendingPort"];
-    squareFrequency = hertzToMilliseconds(jsonConfig["sqaureFrequency"]);
-    circleFrequency = hertzToMilliseconds(jsonConfig["circleFrequency"]);
+    catch (const std::exception& e) {
+        std::cerr << "Exception occurred during JSON configuration loading: " << e.what() << std::endl;
+    }
 }
+
 
 std::chrono::milliseconds Publisher::hertzToMilliseconds(int frequencyHz) {
     return std::chrono::milliseconds(1000 / frequencyHz);

@@ -12,19 +12,23 @@ Subscriber::Subscriber() : running(true) {
 
     createSockets();
 
-    std::thread receiveThread(&Subscriber::receiveUnicastData, this);
-    std::thread registerThread(&Subscriber::registerToPublisher, this);
-
-    receiveThread.detach();
-    registerThread.detach();
+    receiveThread = std::thread(&Subscriber::receiveUnicastData, this);
+    registerThread = std::thread(&Subscriber::registerToPublisher, this);
 }
 
 
 Subscriber::~Subscriber() {
-    // Clean up resources
-    stopPublishing();
-    WSACleanup();
+    try {
+        // Clean up resources
+        stopPublishing();
+        WSACleanup();
+    }
+    catch (const std::exception& ex) {
+        // Handle the exception
+        std::cerr << "Error in Subscriber destructor: " << ex.what() << std::endl;
+    }
 }
+
 
 
 // Stops the subscriber 
@@ -33,6 +37,12 @@ void Subscriber::stopPublishing() {
     running = false;
     closesocket(sendSocketDescriptor);
     closesocket(unicastSocket);
+    if (receiveThread.joinable()) {
+        receiveThread.join();
+    }
+    if (registerThread.joinable()) {
+        registerThread.join();
+    }
 }
 
 void Subscriber::createSockets() {
@@ -107,21 +117,29 @@ std::string Subscriber::serializeToJson() const {
 
 
 void Subscriber::loadConfigurationFromJson() {
-    // Open the JSON file
-    std::ifstream file("../../Configuration/Config.json");
+    try {
 
-    if (!file.is_open()) {
-        std::cerr << "Error opening JSON file." << std::endl;
-        return;
+        // Get the path to the configuration file
+        std::filesystem::path configFilePath = std::filesystem::current_path() / ".." / ".." / "Configuration" / "Config.json";
+
+        // Open the JSON file
+        std::ifstream file(configFilePath);
+
+        if (!file.is_open()) {
+            throw std::runtime_error("Error opening JSON file.");
+        }
+
+        jsonConfig = nlohmann::json::parse(file);
+
+        // Extract parameters
+        subscriberName = jsonConfig["subscriberName"];
+        portNumber = jsonConfig["portNumber"];
+        subscribedShapes = jsonConfig["shapeType"];
+        attributes = jsonConfig["attributes"];
+        multicastSendingGroup = jsonConfig["multicastSendingGroup"];
+        multicastSendingPort = jsonConfig["multicastSendingPort"];
     }
-
-    jsonConfig = nlohmann::json::parse(file);
-
-    // Extract parameters
-    subscriberName = jsonConfig["subscriberName"];
-    portNumber = jsonConfig["portNumber"];
-    subscribedShapes = jsonConfig["shapeType"];
-    attributes = jsonConfig["attributes"];
-    multicastSendingGroup = jsonConfig["multicastSendingGroup"];
-    multicastSendingPort = jsonConfig["multicastSendingPort"];
+    catch (const std::exception& e) {
+        std::cerr << "Exception occurred during JSON configuration loading: " << e.what() << std::endl;
+    }
 }

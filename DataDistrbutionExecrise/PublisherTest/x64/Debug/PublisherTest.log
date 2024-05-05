@@ -1,2 +1,3 @@
 ﻿  PublisherTest.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.39.33519\include\filesystem(12): warning STL4038: The contents of <filesystem> are available only with C++17 or later.
   PublisherTest.vcxproj -> C:\Users\alonf\Desktop\DataDistrbution\DataDistrbutionExecrise\x64\Debug\PublisherTest.exe

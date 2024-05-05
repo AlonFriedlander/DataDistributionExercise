@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     // Pass the arguments as an array to the constructor of Subscriber
     Subscriber subscriber;
 
-    std::this_thread::sleep_for(std::chrono::seconds(1000));
+    std::this_thread::sleep_for(std::chrono::seconds(5000));
 
     subscriber.stopPublishing();
     return 0;

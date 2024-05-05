@@ -18,7 +18,7 @@
 #include "ThreadPool.h"
 #include "CommonLibrary\Common.h"
 #include "SendingInfo.h"
-#include "../../../external/json/include/nlohmann/json.hpp"
+#include "nlohmann/json.hpp"
 
 
 
@@ -50,13 +50,11 @@ class Publisher {
 public:
     Publisher();
     ~Publisher();
-
     void startPublishing();
     void stopPublishing();
 
 private:
     using FunctionPtr = std::function<std::string()>;
-
 
     // Private member functions
     void initializeList();
@@ -77,7 +75,6 @@ private:
     //void squareTask(ThreadPool& pool);
     //void handler(const std::string& jsonString, const SubscriberShapePtr& subscriberShapePtr);
 
-
     // Private data members
     std::vector<SendingInfo> specificTypeList;
     bool running;
@@ -93,6 +90,9 @@ private:
     std::vector<SubscriberShapePtr> subscribersList;
     std::map<std::string, SubscriberShapePtr> map;
     std::mutex functionMapMutex;
+    ThreadPool threadPool;
+    std::thread listenerThread;
+    std::mutex registeredSubscribersMutex;
 
     // Define the map with function pointers
     std::map<std::string, FunctionPtr> functionMap;

@@ -10,8 +10,8 @@
 #include <chrono>
 #include <thread>
 #include "CommonLibrary\Common.h"
-//#include "../../../external/argparse/include/argparse/argparse.hpp"
-#include "../../../external/json/include/nlohmann/json.hpp"
+#include "nlohmann/json.hpp"
+
 
 // Include Winsock headers for Windows socket programming
 #include <WinSock2.h>
@@ -45,4 +45,7 @@ private:
     std::set<std::string> subscribedShapes;
     std::vector<std::string> attributes;
     nlohmann::json jsonConfig;
+    std::thread receiveThread;
+    std::thread registerThread;
+
 };

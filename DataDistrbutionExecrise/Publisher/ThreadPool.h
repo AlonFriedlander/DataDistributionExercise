@@ -13,8 +13,9 @@ class ThreadPool {
 public:
     using Task = std::function<void()>;
 
-    ThreadPool(size_t numThreads);
+    ThreadPool();
     ~ThreadPool();
+    void startThreadPool(size_t numThreads); // Function to start the thread pool with the specified number of threads
     void enqueue(Task);
 
 private:
@@ -22,6 +23,5 @@ private:
     std::queue<Task> tasks;
     std::mutex queueMutex;
     std::condition_variable condition;
-    //bool stop;
     std::atomic<bool> stop;
 };

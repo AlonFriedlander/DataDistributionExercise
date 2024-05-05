@@ -1,7 +1,16 @@
 #include "ThreadPool.h"
 
+ThreadPool::ThreadPool() : stop(false) {}
 
-ThreadPool::ThreadPool(size_t numThreads) : stop(false) {
+ThreadPool::~ThreadPool() {
+    stop = true;
+    condition.notify_all();
+    for (std::thread& worker : workers) {
+        worker.join();
+    }
+}
+
+void ThreadPool::startThreadPool(size_t numThreads) {
     for (size_t i = 0; i < numThreads; ++i) {
         workers.emplace_back([this] {
             while (true) {
@@ -17,14 +26,6 @@ ThreadPool::ThreadPool(size_t numThreads) : stop(false) {
                 task();
             }
             });
-    }
-}
-
-ThreadPool::~ThreadPool() {
-    stop = true;
-    condition.notify_all();
-    for (std::thread& worker : workers) {
-        worker.join();
     }
 }
 

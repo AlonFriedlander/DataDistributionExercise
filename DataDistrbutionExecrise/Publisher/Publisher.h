@@ -95,7 +95,6 @@ private:
     std::mutex functionMapMutex;
 
     // Define the map with function pointers
-    //using FunctionPtr = std::function<std::string()>;
     std::map<std::string, FunctionPtr> functionMap;
     std::set<int> registeredPortNumbers; // Set to store registered port numbers
 };

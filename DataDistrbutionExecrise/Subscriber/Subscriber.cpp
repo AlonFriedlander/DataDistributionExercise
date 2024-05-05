@@ -13,10 +13,10 @@ Subscriber::Subscriber() : running(true) {
     createSockets();
 
     std::thread receiveThread(&Subscriber::receiveUnicastData, this);
-    std::thread receiveThread2(&Subscriber::registerToPublisher, this);
+    std::thread registerThread(&Subscriber::registerToPublisher, this);
 
     receiveThread.detach();
-    receiveThread2.detach();
+    registerThread.detach();
 }
 
 

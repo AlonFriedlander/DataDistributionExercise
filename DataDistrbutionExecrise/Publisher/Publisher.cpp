@@ -192,7 +192,6 @@ void Publisher::subscriberRegistrar() {
             if (registeredPortNumbers.count(portNumber)) {
                 continue;
             }
-
             // Register the port number
             registeredPortNumbers.insert(portNumber);
 

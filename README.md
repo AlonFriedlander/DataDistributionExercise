@@ -56,87 +56,33 @@ Third-party dependencies, including:
 1. C++ compiler with C++17 or later support (e.g., GCC, Clang, or MSVC).
 2. CMake for building the project.
 3. UDP communication requires an open port on localhost.
-
-4. **Git:** To clone the repository, you need Git installed.
+4. Git: To clone the repository, you need Git installed.
 
 
 ## Get Started
 
-To get started with the Music Rehearsal App, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/AlonFriedlander/MusicRehearsalApp.git
+   git clone https://github.com/AlonFriedlander/DataDistributionExercise.git
+   cd DataDistributionExercise
     ```
-2. **Navigate to the main directory:**
+2. **Build the project using CMake:**
     ```bash
-    cd MusicRehearsalApp
+    mkdir build
+    cd build
+    cmake ..
+    make
     ```
-3. **Install dependencies for both the frontend and backend:**
-    * Navigate to the backend directory and install dependencies:
-        ```bash
-        cd backend
-        npm install
-        ```
-    * Navigate to the frontend directory and install dependencies:
-        ```bash
-        cd ../frontend
-        npm install
-        ```
-**Before continuing, make sure to set up the required environment variables as described in the Environment Variables section below.**
+3. **Run the publisher:**
+    ```bash
+    ./Publisher
+    ```
+4. **Run one or more subscribers:**
+    ```bash
+    ./Subscriber --type square
+    ./Subscriber --type general
+    ```
 
-4. **Run the development servers:**
-    * Start the backend server:
-        ```bash
-        cd ../backend
-        npm start
-        ```
-    * Start the frontend server:
-        ```bash
-        cd ../frontend
-        npm start
-        ```
-
-
-## Environment Variables
-Ensure you set up the following environment variables before running the app:
-
-Backend (.env in the backend directory):
-```bash
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-```
-Frontend (.env in the frontend directory):
-```bash
-REACT_APP_BACKEND_URL=http://localhost:5000
-```
-Replace your_mongodb_connection_string and your_jwt_secret with your actual values. Ensure these .env files are excluded from version control by checking your .gitignore file.
-
-### notes:
-* **PORT:** The port where the backend server runs (default: 5000).
-* **MONGO_URI:** The MongoDB connection string for the database.
-* **JWT_SECRET:** A secret key used to sign and verify JWT tokens.
-* **REACT_APP_BACKEND_URL:** The URL the frontend uses to communicate with the backend server.
-
-
-## API Endpoints
-### Authentication
-* **POST /api/auth/register:** Registers a new user with a username, password, instrument, and role.
-* **POST /api/auth/login:** Logs in an existing user and returns an authentication token.
-* **GET /api/auth/validate-token:** Validates the user's token and returns user information.
-* **GET /api/auth/validate-admin-token:** Validates the admin's token and returns admin
-
-### Rehearsal Management
-* **GET /api/rehearsal/search:** Searches for songs based on a query string.
-* **POST /api/rehearsal/select:** Selects a song to be used in a live session.
-* **GET /api/rehearsal/live/song:** Retrieves the current live song's data.
-* **POST /api/rehearsal/admin/quit-session:** Ends the current rehearsal session.
-
-
-
-## This app is constructed from two main projects:
-
-* **Backend:** Handles the server-side logic, database operations, and real-time socket communication.
-
-* **Frontend:** Provides the user interface for interacting with the app, including selecting songs and viewing lyrics.
+## Configuration
+Modify Configuration/Config.json to customize frequencies, shape properties, or other settings.
